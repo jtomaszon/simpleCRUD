@@ -1,11 +1,12 @@
 {
-    "name": "simpleCRUD",
-    "description": "CRUD in node.JS",
+    "name": "siat",
+    "description": "FAB | Sistema Interno de Atualizações e Treinamentos",
     "version": "0.0.1",
     "private": true,
     "dependencies": {
         "redis": "latest",
-        "mongoose": "latest",
+        "connect-redis": "latest",
+        "mongodb": "latest",
         "jade": "latest",
         "express": "latest",
 	"nodemon" : "latest"

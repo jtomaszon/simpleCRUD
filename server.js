@@ -1,35 +1,151 @@
 var express = require("express"),
-    app = express();
+siat = require("./routes/siat"),
+app = express();
 
-// var redis = require("redis"),
-//     client = redis.createClient();
+var mongo = require('mongodb'),
+Server = mongo.Server,
+Db = mongo.Db,
+ObjectID = require('mongodb').ObjectID;
+
+var RedisStore = require('connect-redis')(express);
+
+//connecting to mongo
+var server = new Server('localhost', 27017, {
+  auto_reconnect: true
+});
+db = new Db('siat', server, {safe:true});
+db.open(function(err, db) {
+  if(!err) {
+    console.log("Connected to database: siat");
+  }
+});
+
+var redis = require("redis"),
+cache = redis.createClient();
 
 // Configuration
-
 app.configure(function(){
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'jade');
-    app.set('view options', {
-        layout: false
-    });
+  app.set('port', process.env.PORT || 3000);    
+  app.set('views', __dirname + '/views');
+  app.set('view engine', 'jade');
+  app.set('view options', {
+    layout: false
+  });
 
-    app.use(express.bodyParser());
-    app.use(express.methodOverride());
-    app.use(app.router);
-    app.use(express.static(__dirname + '/public'));
+  app.use(express.bodyParser());
+  app.use(express.cookieParser());
+  app.use(express.session({
+    secret: "SiatFAB",
+    store: new RedisStore
+  }));
+  app.use(express.methodOverride());
+  app.use(app.router);
+  app.use(express.static(__dirname + '/public'));
 
 });
 
 app.configure('development', function(){
-    app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
 });
 
 app.configure('production', function(){
-    app.use(express.errorHandler()); 
+  app.use(express.errorHandler()); 
 });
 
-app.listen(3000);
+// Routes
+app.get('/', loadUser, function (req, res) {
+  res.render('users', {
+    user: req.currentUser,
+    courses: req.userCourses
+  });
 
-app.get('/', function(req, res){
-    res.render('home');
+});
+
+app.get('/login', function (req, res) {
+  res.render('login');
+  console.log()
+});
+
+app.post('/login', function (req, res) {
+  db.collection("users", function (err, collection) {
+    collection.findOne({
+      cpf: req.body.cpf
+    }, function (err, doc) {
+      if (doc && doc.passwd === req.body.passwd) {
+        req.session.user_id = doc._id;
+        res.redirect('/');
+      }else {
+        res.redirect('/cadastro')
+      }
+    });
+  });
+});
+
+app.get('/logout', function (req, res) {
+  req.session.user = undefined;
+  res.clearCookie('connect.sid', { path: '/' });
+  res.redirect('/');
+});
+
+app.get('/cadastro', function (req, res) {
+  res.render('signin');
+  console.log()
+});
+
+app.post('/cadastro', function (req, res) {
+  var user = req.body;
+  console.log('Adding user: ' + JSON.stringify(user));
+  db.collection("users", function (err, collection) {
+    collection.insert(user, {safe: true}, function(err, result){
+      if (!err) {
+        console.log('Success: ' + JSON.stringify(result[0]));
+        res.redirect('/')
+      } else {
+        res.render('signin', {
+          status: "error"
+        })
+      }
+    });
+  });
+});
+
+function loadUser(req, res, next) {
+  if (req.session.user_id) {
+    db.collection("users", function (err, collection) {
+      collection.findOne({
+        _id: new ObjectID(req.session.user_id)
+      }, function (err, user) {
+        if (user) {
+          req.currentUser = user;
+          db.collection("courses", function (err, collection) {
+            collection.findOne({
+              _id: new ObjectID(user.courses.courseId)
+            }, function (err, course) {
+              if (course) {
+                req.userCourses = course;
+                next()
+              }
+            });
+          });
+        } else {
+          res.redirect('/login');
+        }
+      });
+    });
+  } else {
+    res.redirect('/login');
+  }
+}
+
+
+// Administration routes
+app.get('/admin', loadUser, function (req, res) {
+  res.render('admin', {
+    user: req.currentUser
+  });
+  console.log('System is under Administrator Power');
+})
+
+app.listen(app.get('port'), function () {
+  console.log("Server listening on port " + app.get('port'));
 });
