@@ -7,7 +7,7 @@ Server = mongo.Server,
 Db = mongo.Db,
 ObjectID = require('mongodb').ObjectID;
 
-var RedisStore = require('connect-redis')(express);
+// var RedisStore = require('connect-redis')(express);
 
 //connecting to mongo
 var server = new Server('localhost', 27017, {
@@ -20,8 +20,8 @@ db.open(function(err, db) {
   }
 });
 
-var redis = require("redis"),
-cache = redis.createClient();
+// var redis = require("redis"),
+// r = redis.createClient();
 
 // Configuration
 app.configure(function(){
@@ -35,8 +35,7 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.cookieParser());
   app.use(express.session({
-    secret: "SiatFAB",
-    store: new RedisStore
+    secret: "SiatFAB"
   }));
   app.use(express.methodOverride());
   app.use(app.router);
