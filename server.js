@@ -7,7 +7,7 @@ Server = mongo.Server,
 Db = mongo.Db,
 ObjectID = require('mongodb').ObjectID;
 
-// var RedisStore = require('connect-redis')(express);
+var RedisStore = require('connect-redis')(express);
 
 //connecting to mongo
 var server = new Server('localhost', 27017, {
@@ -35,7 +35,8 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.cookieParser());
   app.use(express.session({
-    secret: "SiatFAB"
+    secret: "SiatFAB",
+    store: new RedisStore
   }));
   app.use(express.methodOverride());
   app.use(app.router);
@@ -108,6 +109,40 @@ app.post('/cadastro', function (req, res) {
   });
 });
 
+app.post('/addToCourse', function (req, res) {
+  var request = req.body;
+  console.log(request);
+
+  db.collection("courses", function (err, collection) {
+    collection.findOne({
+      code: request.course
+    }, function (err, course) {
+      console.log(course);
+      if (course) {
+
+        db.collection("users", function (err, collection) {
+
+          var data = {};
+          data = {courses: { "courseId": course._id, "status" : "ATIVO", nOS: request.nOS, nParent: request.nParent}};
+
+          collection.update({ cpf: request.user }, { $set: data } , {safe:true}, function(err, result){
+            if (err) {
+                console.log('Error updating: ' + err);
+                res.send({'error':'An error has occurred'});
+            } else {
+                console.log('' + result + ' document(s) updated');
+                res.send({'status': 'DOCUMENT_SAVED'});
+            }
+          });
+        });
+
+
+
+      }
+    });
+  });
+});
+
 function loadUser(req, res, next) {
   if (req.session.user_id) {
     db.collection("users", function (err, collection) {
@@ -116,16 +151,22 @@ function loadUser(req, res, next) {
       }, function (err, user) {
         if (user) {
           req.currentUser = user;
-          db.collection("courses", function (err, collection) {
-            collection.findOne({
-              _id: new ObjectID(user.courses.courseId)
-            }, function (err, course) {
-              if (course) {
-                req.userCourses = course;
-                next()
-              }
+          if (user.courses !== undefined) {
+            db.collection("courses", function (err, collection) {
+              collection.findOne({
+                _id: user.courses.courseId
+              }, function (err, course) {
+                if (course) {
+                  req.userCourses = course;
+                  next()
+                }
+              });
             });
-          });
+
+          } else {
+            req.userCourses = "";
+            next()
+          }
         } else {
           res.redirect('/login');
         }
@@ -143,6 +184,48 @@ app.get('/admin', loadUser, function (req, res) {
     user: req.currentUser
   });
   console.log('System is under Administrator Power');
+})
+
+app.get('/courses', loadUser, function (req, res) {
+
+  db.collection('courses', function(err, collection) {
+    collection.distinct('code', function(err, courses) {
+
+      res.render('courses', {
+        user: req.currentUser,
+        courses: courses
+      });         
+
+    });
+  })
+})
+
+app.post('/getCourse', loadUser, function (req, res) {
+  var code = req.body.code;
+
+  db.collection('courses', function(err, collection) {
+    collection.findOne({code: code}, function(err, course) {
+      res.send(course);
+    });
+  })
+})
+
+app.get('/getUsers', loadUser, function (req, res) {
+  var q = req.query.q
+  db.collection('users', function(err, collection) {
+    collection.distinct('cpf', {cpf: {'$regex': q }}, function(err, users) {
+      res.send(users);         
+    });
+  });
+})
+
+app.get('/getUser', loadUser, function (req, res) {
+  var cpf = req.query.q;
+  db.collection('users', function(err, collection) {
+    collection.findOne({cpf: cpf}, function(err, users) {
+      res.send(users);         
+    });
+  });
 })
 
 app.listen(app.get('port'), function () {

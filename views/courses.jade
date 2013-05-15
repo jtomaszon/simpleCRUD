@@ -1,0 +1,68 @@
+extends layout
+
+block container
+  .container-fluid
+    .row-fluid
+      .span2
+        .well.sidebar-nav
+          ul.nav.nav-list
+            li.nav-header Cursos
+
+            each course in courses
+              li
+                a.course(href='/courses##{course}')
+                  =course
+
+      .span10#conteudo(style="display: none")
+        .well-large
+          h2
+            small
+              div#courseName
+                strong Curso
+          h3
+            small
+                div#courseLocation
+                  strong Local
+          .row-fluid
+            .span6
+              h4 Tempo limite
+              div.pull-left SIAT: &nbsp
+              div.pull-left#dueDateSIAT    &nbsp
+              p &nbsp
+              div.pull-left DECEA: &nbsp
+              div.pull-left#dueDateDECEA   &nbsp
+            .span6
+              h4 Duração
+              div.pull-left Data de começo: &nbsp
+              div.pull-left#startDate &nbsp
+              p &nbsp
+              div.pull-left Data de fim: &nbsp
+              div.pull-left#endDate   &nbsp
+
+        .row-fluid
+          .span6
+            h3 Cadastro:
+            #cadastro
+              input#users.input-medium.search-query(type='text', data-provide='typeahead', autocomplete='off', name='users') 
+              button#submitButtonId.btn-primary Cadastrar
+
+          .span6
+            h3 Alunos:
+            ul#cadastrados
+            p &nbsp;
+            button#saveCourse.btn.disabled(disabled='disabled') Salvar
+
+  #myModal.modal.hide.fade
+    .modal-header
+        button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+        h3 Indicação e OS
+      .modal-body
+        input#nOS.input-block-level(name='nOS', type='text', placeholder='Indicação')
+        input#nParent.input-block-level(name='nParent', type='text', placeholder='OS')
+      .modal-footer
+        a#saveCourse.btn.btn-primary Save changes
+
+
+
+
+

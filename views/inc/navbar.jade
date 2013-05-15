@@ -11,14 +11,15 @@
         if(typeof(user) !== 'undefined')
           ul.nav.pull-right
             li
-              a.dropdown-toggle(href='#', data-toggle='dropdown')= user['name']  
+              a.dropdown-toggle(href='#', data-toggle='dropdown')
+                = user['name']
+                b.caret
               ul.dropdown-menu
-                li
-                  a(href='/') Cursos
-
                 if(user.isAdmin == "on") 
                   li.divider
                   li.nav-header Administração
+                  li
+                    a(href='/courses') Cursos
                   li
                     a(href='/admin') Panel administrativo
                 // end if admin

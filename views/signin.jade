@@ -1,0 +1,26 @@
+extends layout
+
+block container
+  .container
+    if(typeof(status) === 'undefined')
+        div#message.alert.alert-info
+            | Adiciona um usuario novo
+    else
+        div#message.alert.alert-error
+            | CPF Duplicado
+
+    form.form-signin(action='/cadastro', method='post')
+      h2.form-signin-heading Cadastro Pessoal
+      input#name.input-block-level(name='name', type='text', placeholder='Nome')
+      input#cpf.input-block-level(name='cpf', type='text', placeholder='CPF')
+      input#rg.input-block-level(name='rg', type='text', placeholder='Identidade')
+      input#saram.input-block-level(name='saram', type='text', placeholder='SARAM')
+      select#setor.input-block-level(name='setor')
+          setores = ["Setor", "---", "AIS-SP", "APP-SP", "ASSIPACEA-SP", "DA", "DT", "EMS/CMA-SP", "INFORMATICA", "OPS-SP", "SIAT-SP", "SSIATO-SP", "TWR-SP"]
+          for setor in setores
+              option #{setor}
+      input#passwd.input-block-level(name='passwd', type='text', placeholder='Senha')
+      label.checkbox
+        input(name='isAdmin', type='checkbox')
+        | Administrador?
+      button.btn.btn-large.btn-primary(type='submit') Sign in

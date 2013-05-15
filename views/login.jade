@@ -1,0 +1,12 @@
+extends layout
+
+block container
+    .container
+        form.form-signin(action='/login', method='post')
+            h2.form-signin-heading Login
+            input#cpf.input-block-level(name='cpf', type='text', placeholder='CPF')
+            input#passwd.input-block-level(name='passwd', type='password', placeholder='Password')
+            label.checkbox
+                input(type='checkbox', value='remember-me')
+                | Remember me
+            button.btn.btn-large.btn-primary(type='submit') Login

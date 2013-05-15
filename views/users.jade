@@ -1,0 +1,55 @@
+extends layout
+
+block container
+  .container-fluid.user-details
+
+    .well
+      h2= user['name']
+      ul
+        li 
+          div.input-prepend
+            span.add-on CPF:
+            input#cpf.input-block-level(name='cpf', type='text', value='#{user.cpf}', disabled)
+        li 
+          div.input-prepend
+            span.add-on RG:
+            input#cpf.input-block-level(name='rg', type='text', value='#{user.rg}', disabled)
+        li
+          div.input-prepend
+            span.add-on SARAM:
+            input#cpf.input-block-level(name='saram', type='text', value='#{user.saram}', disabled)
+
+    if(typeof(user.courses) !== 'undefined')
+      .row-fluid
+        .span12.well-large
+          case user.courses.status
+            when "ATIVO"
+              div#ativo.pull-right.badge.badge-success ATIVO
+            when "CANCELADO"
+              div#cancelado.pull-right.badge.badge-important CANCELADO
+            when "CONCLUÍDO"
+              div#concluido.pull-right.badge.badge-info CONCLUÍDO
+
+          div.page-header 
+            h2 #{courses.code}
+            h4 #{courses.name}
+          ul
+            li
+              div.input-prepend
+                span.add-on PERÍODO: 
+                input#periodo.input-block-level(name='periodo', type='text', value='#{courses.startDate} até #{courses.endDate}', disabled)
+            li
+              div.input-prepend
+                span.add-on LOCAL: 
+                input#location.input-block-level(name='location', type='text', value='#{courses.location}', disabled)
+            li
+              div.input-prepend
+                span.add-on ORDEM DE SERVIÇO:
+                input#nOS.input-block-level(name='nOS', type='text', value='#{user.courses.nOS}', disabled)
+            li
+              div.input-prepend
+                span.add-on INDICAÇÃO: 
+                input#nIndica.input-block-level(name='nIndica', type='text', value='#{user.courses.nParent}', disabled)
+
+
+

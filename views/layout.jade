@@ -7,13 +7,14 @@ head
   meta(name='description', content='SIAT Sistema Interno de Atualizações e Treinamentos')
   meta(name='author', content='Javier Tomas Zon')
 
-  link(href='css/bootstrap.css', rel='stylesheet')
-  link(href='css/main.css', rel='stylesheet')
-  link(rel='shortcut icon', href='img/favicon.png')
+  link(href='/css/bootstrap.css', rel='stylesheet')
+  link(href='/css/main.css', rel='stylesheet')
+  link(href='/img/favicon.png', rel='shortcut icon')
+
+  script(src='/js/jquery-1.9.1.js')
 
 body
   include inc/navbar
   block container
-
-  script(src='js/jquery-1.9.1.js')
-  script(src='js/bootstrap.js')
+  script(src='/js/bootstrap.js')
+  script(src='/js/main.js')
